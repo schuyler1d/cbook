@@ -1,0 +1,221 @@
+tools:
+  see where my info can get to (from 'weakest link')
+  see what a certain person can see (of mine)
+
+site:
+  feed for all things for you (rss-like)    
+  OAuth
+  twitter annotation
+private-key per friend-group?
+
+-----
+comm issues
+  friends of friends needs to know who friends are
+     OR have a proxy 'friend'
+-----
+importable
+exportable
+(encrypted and unencrypted)
+(partial and whole)
+
+privacy settings (shared)
+
+proxies:
+  OAuth
+   persistant permission, or one-time?
+   http://openidconnect.com/
+
+everyone, 
+friends of friends, (proxy)
+friends, (proxy)
+with-permission (you get asked) , (proxy)
+private
+http://developers.facebook.com/docs/authentication/permissions
+
+personal info
+   name
+   alias
+   bio
+   birthday  (Month, Day, Year have separate permissions)
+   interested in/looking for
+   religious views
+   political views
+   photo albums
+   posts by me
+   allow friends to post on my wall
+   who can see my wall
+   posts by friends
+   comments on posts
+
+contact info
+   im screen name
+   mobile phone
+   other phone
+   current address
+   website
+   add me as a friend
+   send me a message
+   (each email address)
+   
+   web presence
+
+friends/tags/connections
+   friend list
+   family list
+   relationships
+   photos and videos of me
+   current city
+   current (immediate location)
+   hometown
+   education and work
+   activities
+   interests
+   things I like
+   
+applications and websites
+   (what you share) (fb section: learn more)
+   what your friends can share
+   blocked applications
+   ignore application invites
+   activity on applications and games dashboards
+   instant personalization pilot program
+      use publicly for other websites
+
+   sky: 
+
+search
+block list
+
+
+
+------------------------------------
+site specific
+  sort of like a 'friend'
+  attention levels (ignore X)  (sites can obviously customize these things)
+     friend-status
+     friends sharing your content/etc
+
+application specific (with default)
+  what you can share
+  what others can share
+
+SITE-to-SITE
+  public-key
+  contacts
+  picture/icon
+  contact-info
+
+
+Interface:
+  my keys
+    create new key
+    share with friends: (passphrase)
+    
+  friends keys
+    add
+  backup/restore
+  
+key:name/alias:hash
+
+:desired privacy (friends/friends-of-friends/public/with-permission/private (not shared with anyone) )
+    user email/URL
+
+  
+CBOOK_PEOPLE {"s":['key1','key2']}
+*"PERSON_"+hash {key: {fof:{name,email,facebook}, friends:{} } }
+
+{"keys":{"s:kj3l45kj3k4j54":{"friends":{"name":"Schuyler"}}}}
+
+
+Objects
+--------------------
+Friend
+   URI (key, could be email address)
+   pubkey
+   groups (pubkeys)
+
+
+POSTing to the friend URI with
+  shareable-with
+  content
+  uri
+  author(my URI)
+  pubkey (of which the private one is required to decrypt?)
+  other fields (location, comments link, )
+  
+GETing with Accept:text/html or whatever
+  public links
+
+GETing with Accept:application/json
+  digest auth
+
+GETing with Accept:application/foaf
+  should return a REDIRECT to the template URLs
+  for 
+
+User Views
+--------------
+status updates
+where has my info gone?
+where are my friends (which apps)?
+
+protocols for encrypted tweets:
+{].2j0 k34jl5k3j4l5k34kk4k4kl3l33
+♔.☿ #K$J%#$%J#:L$KJ%#
+♔,말  K$J%#$%J#:Lあ叶葉K$J%#$%J#:L
+support unicode for most languages by doing a min() on the unicode chars, and
+subtracting the value off from all the chars.  Then put the min() in the front
+
+14chars for IV
+1char for addition
+4chars for ♔.☿ (could make it 3)
+'http://skyb.us/' == 15 chars
+140=17+1+4+15+103
+
+ascii 61-* is ok.  avoid [^<&;]
+
+128+12=140
+
+128*128=16384
+
+2299099 is last unicode char I see
+but there are lots of holes
+
+Who do you trust?
+
+DEEPER levels of paranoia:
+--------------------------
+your hosting company
+  you put your SSL private key on the host, so they can pretend to be you
+  
+  What to do:
+
+your web browser
+  certificates
+
+your email communication channel
+  Google admits they read your email.  How many other companies do the same?
+ 
+  What to do:  use pgp encryption
+
+your operating system
+  
+  What to do: well, first how about trying Linux--at least,
+    other people can analyze the source code that it was based on
+    and Linux-people are hippies anyway, right?
+
+  Actually, it's a good first step
+
+
+your compiler
+  
+
+
+your computer
+  Who knows what secret instructions Intel and AMD were told to add
+   by the NSA or China.  Wait!  A lot of these chip and computer
+   factories are IN China....
+
+  What to do?
+    Well, there's open-source hardware.  You could get some eproms and 
+    punch in the assembly by hand to the.....AHHAHHAH!

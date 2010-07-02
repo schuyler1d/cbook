@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CBook</title>
+    <style type="text/css">
+    body {background-color:#EDFEFF}
+      textarea {width:100%;}
+      .hide,.sec {display:none;}
+      .sec:target {display:block;}
+      .small{font-size:9px;}
+      a.bookmarklet {
+    text-decoration:none;
+    text-align:center;
+    padding:5px;
+    background-color:#BBBBBB;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    
+      } 
+    </style>
+  </head>
+  <body>
+    <span id="decrypt_output"></span>
+    <form id="encode" class="sec" onsubmit="return false;">
+      
+	<textarea name="txt"></textarea>
+	<button onclick="p.innerHTML = encrypt_message(t.value,(c.checked?'unicrap':'base64'),f.value);return false;">encrypt</button>
+        for friends of 
+        <select name="friendkey">
+          <option value="s">mine</option>
+        </select>
+           <input type="checkbox" name="compress" value="unicrap"><span class="small">dense unicode (for Twitter not Facebook)</span>
+        <span id="authentic"></span><a href="http://github.com/schuyler1d/cbook/issues">?</a>
+	<p id="output"></p>
+	<!--button onclick="f.value = decrypt_message(p.innerHTML);return false;">decrypt</button-->
+    </form>
+    <div id="decode" class="sec"></div>
+    <div id="setup">
+      <form id="addfriends" class="sec" action="#addfriends">
+	<h4>Add Friends</h4>
+	Site passphrase:
+	<input type="text" size="30" name="passphrase" />
+	<textarea rows="8" name="friendlinks"></textarea>
+	<input type="submit" value="Add Friends"/>
+      </form>
+
+      <form id="generatekey" class="sec" onsubmit="update_bookmarklet();return false;">
+	<h4>Generate Your Key</h4>
+	Name or Alias:
+	<input type="text" size="30" name="alias" /><br />
+	<input type="submit" value="Generate your Friends-Key" /><br />
+	<span id="keylinksec" class="hide">
+	  Share this link with all your friends.  
+	  <a id="keylink" class="hide" href="#foo">link for friends</a>
+	  
+	</span>
+        <br />
+	Drag this bookmarklet, <a class="bookmarklet" id="bookmarklet" href="">&#9812; cb&#1012;&#1012;k</a> into your browser toolbar.  Then run it, when you are on a page with the encrypted messages of your friends or after you click on a text-area to input text.
+
+
+      </form>
+    </div>
+    <a class="sec" href="http://github.com/schuyler1d/cbook/issues">Report a Problem</a>
+
+    <script type="text/javascript" src="js/base64.js"></script>
+    <script type="text/javascript" src="js/ecmascrypt_v003.js"></script>
+    <script type="text/javascript" src="js/local_session.js"></script>
+    <script type="text/javascript" src="js/base.js"></script>
+
+    <script type="text/javascript" id="bookmarklet_source">
+      function bookmarklet(loc,friends) {
+         var active = document.activeElement,
+	     tags = {},
+             nodes = [],
+             crown = String.fromCharCode(9812),
+	     lt = String.fromCharCode(60),
+	     amp = String.fromCharCode(38),
+	     quot = String.fromCharCode(34),
+	     laq = lt+amp+quot;
+
+	     var crypted_regex_str = crown+'[.,_][^>?'+laq+'\'] [^:>?'+laq+'\']+:[^:>?'+laq+'\']+',
+	     html_regex_str = lt+'([:\\w]+)[^'+lt+']+';
+
+	     var html_regex = new RegExp(html_regex_str+crypted_regex_str),
+	         crypted_regex = new RegExp(crypted_regex_str);
+	     
+	     var mkfrm = function(par,src,height) {
+		 if (par.firstChild.nodeType==1) if(par.firstChild.tagName.toLowerCase()=='iframe') {
+		     return;
+		     par.removeChild(par.firstChild);
+		 }
+		     
+	        var frm = par.ownerDocument.createElement('iframe');
+		frm.setAttribute('width', par.offsetWidth);
+		frm.setAttribute('height', height||par.offsetHeight);
+		frm.setAttribute('class','cbook');
+		/*par.appendChild(frm);*/
+		par.insertBefore(frm,par.firstChild);
+		frm.src = src;
+		return frm;
+	     };
+
+	  /* begin process */
+          if (document.evaluate) {
+              var xPathResult = document
+                  .evaluate('.//text()[contains(normalize-space(.),'+quot+crown+quot+')]',
+                            document.body,
+                            null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+              for (var i = 0, l = xPathResult.snapshotLength; l > i; i++) {
+                  var textNode = xPathResult.snapshotItem(i);
+                  var m = textNode.data.match(crypted_regex);
+		  var n = textNode.parentNode.parentNode.textContent.match(crypted_regex);
+                  if (m!=null) {
+                      nodes.push(textNode);
+                      var frm = mkfrm(textNode.parentNode, loc+'?decrypt;mode=postMessage#decrypt='+m[0]);
+                  } else if (n!=null) {	/*for facebook, which breaks up long words*/
+                      nodes.push(textNode);
+                      var frm = mkfrm(textNode.parentNode.parentNode, loc+'?decrypt;mode=postMessage#decrypt='+n[0]);
+		  }
+              }
+          } else {/*if we ever start caring about IE*/
+              var matches = document.body.innerHTML.split(html_regex);
+              while (matches.length > 1) {
+                  matches.shift();
+                  var tag = matches.shift();
+                  /*coded = matches.shift();*/
+                  tags[tag] = [];
+              }
+              for (t in tags) {
+                  var elts = document.getElementsByTagName(t);
+                  for (var i=0;elts.length>i;i++) {
+                      /*while (i--) {*/
+                      var m = elts[i].innerHTML.match(crypted_regex);
+                      var dbl_parent = elts[i].innerHTML.match(html_regex);
+                      if (m!=null) if(dbl_parent==null) {
+                              tags[t].push(elts[i]);
+                              var frm = mkfrm(elts[i],loc+'?decrypt;mode=postMessage#decrypt='+m[0]);
+                          }
+                  }
+              }
+          }
+         if (active.tagName.toLowerCase() in {textarea:1,input:1}
+	         || active.contenteditable
+	        ) {
+		var compress = (/twitter/.test(location) ? ';compress=true' : '');
+	        var frm = mkfrm(active.parentNode,loc+'?mode=postMessage'+compress+'#encode',101);
+		var w = window;/*frm.contentWindow;*/
+		var listener = function(evt) {
+		    if (evt.source == frm.contentWindow) {
+		       if (active.contenteditable) {
+		          active.innerHTML += evt.data;
+		       } else {
+		          if (active.getAttribute('placeholder')==active.value) {
+			     active.value = evt.data;
+			     if (active.className) {/*facebook*/
+			        active.className = active.className.replace('placeholder','')
+			     }
+			  } else {
+		             active.value += evt.data;
+			  }
+		       }
+		    }
+		};
+		if (w.addEventListener) {
+		   w.addEventListener('message',listener,false);
+		} else if (w.attachEvent) {
+		   w.attachEvent('message',listener);
+		}
+	     }
+      }
+    </script>
+    <script type="text/javascript">
+      window.t = document.forms[0].elements["txt"];
+      window.c = document.forms[0].elements["compress"];
+      window.f = document.forms[0].elements["friendkey"];
+      window.p = document.getElementById('output');
+      var dec = document.location.hash.match(/decrypt=(.+)$/);
+      if (dec!=null) {
+         document.getElementById('decrypt_output').innerHTML = decrypt_message(dec[1]);
+	 var x = window.parent.location;
+	 //window.parent.location = x+'#foooo';
+      }
+
+      if (/encode/.test(document.location.hash)) {
+         document.forms['encode'].elements['txt'].focus();
+	 document.forms['encode'].elements['compress'].checked = (
+	    /compress=true/.test(document.location.search)
+	    );      
+      }
+      update_bookmarklet();
+    </script>    
+  </body>
+</html>
