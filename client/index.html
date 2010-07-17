@@ -79,11 +79,11 @@
 	     quot = String.fromCharCode(34),
 	     laq = lt+amp+quot;
 
-	     var crypted_regex_str = crown+'[.,_][^>?'+laq+'\'] [^:>?'+laq+'\']+:[^:>?'+laq+'\']+',
+	 var crypted_regex_str = crown+'[.,_][^>?'+laq+'\'] [^:>?'+laq+'\']+:[^:>?'+laq+'\']+:?',
 	     html_regex_str = lt+'([:\\w]+)[^'+lt+']+';
 
 	     var html_regex = new RegExp(html_regex_str+crypted_regex_str),
-	         crypted_regex = new RegExp(crypted_regex_str);
+	         crypted_regex = new RegExp(crypted_regex_str, 'g');
 	     
 	     var mkfrm = function(par,src,height) {
 		 if (par.firstChild.nodeType==1) if(par.firstChild.tagName.toLowerCase()=='iframe') {
@@ -93,7 +93,7 @@
 		     
 	        var frm = par.ownerDocument.createElement('iframe');
 		frm.setAttribute('width', par.offsetWidth);
-		frm.setAttribute('height', height||par.offsetHeight);
+		frm.setAttribute('height', Math.max(40,height||par.offsetHeight));
 		frm.setAttribute('class','cbook');
 		/*par.appendChild(frm);*/
 		par.insertBefore(frm,par.firstChild);
@@ -109,14 +109,24 @@
                             null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
               for (var i = 0, l = xPathResult.snapshotLength; l > i; i++) {
                   var textNode = xPathResult.snapshotItem(i);
-                  var m = textNode.data.match(crypted_regex);
-		  var n = textNode.parentNode.parentNode.textContent.match(crypted_regex);
+
+                  var frm_loc = loc+'?decrypt;mode=postMessage#decrypt=';
+                  var local_str = textNode.data;
+                  var higher_str = textNode.parentNode.parentNode.textContent;
+                  var m = crypted_regex.exec(local_str);
+		  var n = crypted_regex.exec(higher_str);
                   if (m!=null) {
                       nodes.push(textNode);
-                      var frm = mkfrm(textNode.parentNode, loc+'?decrypt;mode=postMessage#decrypt='+m[0]);
+                      do {
+                          frm_loc += m[0];
+                      } while ((m = crypted_regex.exec(local_str)) != null);
+                      var frm = mkfrm(textNode.parentNode, frm_loc);
                   } else if (n!=null) {	/*for facebook, which breaks up long words*/
                       nodes.push(textNode);
-                      var frm = mkfrm(textNode.parentNode.parentNode, loc+'?decrypt;mode=postMessage#decrypt='+n[0]);
+                      do {
+                          frm_loc += n[0];
+                      } while ((n = crypted_regex.exec(higher_str)) != null);
+                      var frm = mkfrm(textNode.parentNode.parentNode, frm_loc);
 		  }
               }
           } else {/*if we ever start caring about IE*/
@@ -148,18 +158,19 @@
 		var w = window;/*frm.contentWindow;*/
 		var listener = function(evt) {
 		    if (evt.source == frm.contentWindow) {
+                       var key = 'value';
 		       if (active.contenteditable) {
-		          active.innerHTML += evt.data;
+                           key = 'innerHTML';
 		       } else {
 		          if (active.getAttribute('placeholder')==active.value) {
-			     active.value = evt.data;
 			     if (active.className) {/*facebook*/
 			        active.className = active.className.replace('placeholder','')
 			     }
-			  } else {
-		             active.value += evt.data;
 			  }
 		       }
+                       /*add space, in to separate a possible first cmessage from the next*/
+                       if (active[key]) active[key]+= ' ';
+                       active[key] += evt.data;
 		    }
 		};
 		if (w.addEventListener) {

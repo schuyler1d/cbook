@@ -1,7 +1,7 @@
-var crypted_regex_str = String.fromCharCode(9812)+'([.,_])([^<>?&"\']) ([^:<>?&"\']+):([^:<>?&"\']+)',
+var crypted_regex_str = String.fromCharCode(9812)+'([.,_])([^<>?&"\']) ([^:<>?&"\']+):([^:<>?&"\']+):?',
 regex_args = ['codec','hash','iv','ciphtext'],
 html_regex = '<([:\\w]+)[^<]+';
-var crypted_regex = new RegExp(crypted_regex_str);
+var crypted_regex = new RegExp(crypted_regex_str,'g');
 
 /*
   facebook: document.getElementsByClassName('uiStreamMessage')
@@ -164,7 +164,7 @@ var CBook= {
 };//end CBook
 
 function format_post(codec,hash,iv,ciphertext) {
-    var rv = String.fromCharCode(9812)+codec+hash+' '+iv+':'+ciphertext;
+    var rv = String.fromCharCode(9812)+codec+hash+' '+iv+':'+ciphertext+':';
     //console.log(rv.length);
     return rv;
 }
@@ -181,18 +181,20 @@ function test_unicode(txt,f) {
     }
 }
 function decrypt_message(crypted) {
-    var x = crypted.match(crypted_regex);
-    if (x != null) {
+    var x;
+    var retval = '';
+    while ((x = crypted_regex.exec(crypted)) != null) {
 	for (m in CBook) {
 	    if (CBook[m].chr == x[1]) {
 		try {
-		    return decrypt.apply(null,CBook[m].decrypt(x[3],x[4]));
+		    retval += decrypt.apply(null,CBook[m].decrypt(x[3],x[4])) + '<br />';
 		}catch(e) {
-		    return 'Failed to decrypt message, likely due to encoding problems';
+		    retval += 'Failed to decrypt message, likely due to encoding problems<br />';
 		}
 	    }
 	}
-    }    
+    }
+    return retval;
 }
 function encrypt_message(plaintext, mode, key) {
     mode = mode || 'hex';
