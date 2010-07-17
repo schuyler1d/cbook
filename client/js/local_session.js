@@ -45,6 +45,10 @@
 	this.nsPEOPLE = 'CBOOK_PEOPLE';
 	this.nsME = 'ME_';
 
+	this.generateKey = function(frm) {
+	    alert(frm.tagName);
+	}
+
 	this.addFriend = function() {
 	    
 	}
@@ -67,8 +71,8 @@
 
 
     if (window.localStorage) {
-	global.EphemeralSession = new MyStorage();
-	global.e = global.EphemeralSession;
+	global.Stor = new MyStorage();
+	global.e = global.Stor;
     } else {
 	throw "No localStorage support in browser (yet)!";
     }

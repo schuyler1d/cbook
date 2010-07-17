@@ -139,18 +139,12 @@ var CBook= {
     base64:{
 	chr:',',
 	encrypt:function(iv,ciph) {
-	    var iv64 = '';
-	    for (var i=0;i<iv.length;i++) {
-		iv64 += Base64._bytes2chars(iv[i],iv[++i],iv[++i]);
-	    }
-	    return [iv64,Base64.encode(ciph.cipher)];
+	    return [Base64.encodeBytes(iv),
+		    Base64.encode(ciph.cipher)];
 	},
 	decrypt:function(iv64,ciphtext) {
-	    var iv = [];
-	    for (var i=0;i<iv64.length;i+=4) {	    
-		iv.push.apply(iv,Base64._chars2bytes(iv64.substr(i,4)));
-	    }
-	    return [iv,Base64.decode(ciphtext)];
+	    return [Base64.decodeBytes(iv64),
+		    Base64.decode(ciphtext)];
 	}
     }
     /*,hex:{

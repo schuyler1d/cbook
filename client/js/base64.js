@@ -8,8 +8,22 @@
 var Base64 = {
  
 	// private property
-	_keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_/=",
+	_keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=",
  
+        encodeBytes: function(byte_ary) {
+	    var output = "";
+	    for (var i=0;i<byte_ary.length;i++) {
+		output += Base64._bytes2chars(byte_ary[i],byte_ary[++i],byte_ary[++i]);
+	    }
+	    return output;
+	},
+        decodeBytes: function(input) {
+	    var byte_ary = [];
+	    for (var i=0;i<input.length;i+=4) {	    
+		byte_ary.push.apply(byte_ary,Base64._chars2bytes(input.substr(i,4)));
+	    }
+	    return byte_ary;
+	},
 	// public method for encoding
 	encode : function (input) {
 		var output = "";
