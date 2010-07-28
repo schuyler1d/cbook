@@ -16,19 +16,16 @@ var crypted_regex = new RegExp(crypted_regex_str,'g');
 */
 
 var global= {
-    encrypt_key:"99add3674eea0f3a84201b8f65017114",
-    encrypt_iv:"80a5c7ce51fbeb81a9bad0f44112c17408eb46b172fec9b118bfa6dd2a2772fe",
-    mode:0,//0:OFB,1:CFB,2:CBC
-    keysize:16//32 for 256, 24 for 192, 16 for 128
+    FAIL_ENCODING:'Failed to decrypt message, likely due to encoding problems.<br />',
+    FAIL_NOKEY:'None of your saved keys could decrypt this message.<br />'
 }
-function cryptArgs(iv) {
+function cryptArgs(iv, encrypt_key_numbers) {
     ///see http://www.josh-davis.org/ecmascrypt
     ///NOTE:if CBC, then we need to save the msgsize
     var mode = 0; //0:OFB,1:CFB,2:CBC
     var keysize = 16; //32 for 256, 24 for 192, 16 for 128
-    var hexkey = global.encrypt_key;
-    var iv = iv||global.encrypt_iv;
-    return [mode,ecmaScrypt.toNumbers(hexkey),keysize,iv];
+    encrypt_key_numbers = encrypt_key_numbers || ecmaScrypt.toNumbers(global.encrypt_key);
+    return [mode, encrypt_key_numbers, keysize, iv];
 }
 			    
 var U2N = new (function() {
@@ -123,6 +120,7 @@ var U2N = new (function() {
 })();//end U2N
 
 var CBook= {
+    chars:{'.':'unicrap',',':'base64'},
     unicrap:{
 	chr:'.',
 	encrypt:function(iv,ciph) {
@@ -178,33 +176,49 @@ function decrypt_message(crypted) {
     var x;
     var retval = '';
     while ((x = crypted_regex.exec(crypted)) != null) {
-	for (m in CBook) {
-	    if (CBook[m].chr == x[1]) {
-		try {
-		    retval += decrypt.apply(null,CBook[m].decrypt(x[3],x[4])) + '<br />';
-		}catch(e) {
-		    retval += 'Failed to decrypt message, likely due to encoding problems<br />';
-		}
-	    }
+        var friend_keys = Stor.getKeysByIdentifier(x[2]),
+            cbook_method = CBook[CBook.chars[x[1]]],
+            success = false;
+        if (!friend_keys || !friend_keys.length ) {
+            retval += global.FAIL_NOKEY;
+            continue;
+        }
+	try {
+            var iv_ciph = cbook_method.decrypt(x[3],x[4]);
+	}catch(e) {
+	    retval += global.FAIL_ENCODING;
+            continue;
 	}
+        var i = friend_keys.length;
+        while (i--) {
+            try {
+                var msg = decrypt(iv_ciph[0],iv_ciph[1],Base64.decodeBytes(friend_keys[i]));
+	        retval +=  msg+ '<br />';
+                success = true;
+                continue;
+            } catch(e) {/*probably, just the wrong key, keep trying*/}
+        }
+        if (!success) retval += global.FAIL_NOKEY;
     }
     return retval;
 }
-function encrypt_message(plaintext, mode, key) {
+function encrypt_message(plaintext, mode, key_and_ref) {
     mode = mode || 'hex';
-    var tries = 200;
-    var comp = [];
-    comp.push(CBook[mode].chr, key);
+    var key_ref = key_and_ref.substr(0,1),
+        key = Base64.decodeBytes(key_and_ref.substr(2)),
+        tries = 200,
+        comp = [];
     while (--tries) {
 	try {
-	    comp.push.apply(comp, 
-			    CBook[mode].encrypt.apply(null,
-						      encrypt(plaintext)));
+            comp = CBook[mode].encrypt.apply(null,encrypt(plaintext, key));
 	    break;
 	} catch(e) {
 	    //console.log(e);
 	}
     }
+
+    comp.unshift(CBook[mode].chr, key_ref);
+
     if (tries == 0) {
 	throw Error('tried too many times and failed');
     }
@@ -215,16 +229,16 @@ function encrypt_message(plaintext, mode, key) {
     return rv;
 }
 
-function encrypt(plaintext) {
+function encrypt(plaintext, encrypt_key_numbers) {
     var iv = ecmaScrypt.generateSharedKey(ecmaScrypt.aes.keySize.SIZE_128);
-    var crypt_args = cryptArgs(iv);
+    var crypt_args = cryptArgs(iv, encrypt_key_numbers);
     crypt_args.unshift(plaintext);
     
     return [iv, ecmaScrypt.encrypt.apply(ecmaScrypt,crypt_args)];
 }
 
-function decrypt(iv,ciph_string) {
-    var crypt_args = cryptArgs(iv);
+function decrypt(iv,ciph_string, encrypt_key_numbers) {
+    var crypt_args = cryptArgs(iv, encrypt_key_numbers);
     if (crypt_args[0]==2) 
 	throw Error('if CBC, then we need to save the msgsize');
     crypt_args.unshift(ciph_string,0);

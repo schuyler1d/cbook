@@ -22,10 +22,10 @@
   </head>
   <body>
     <span id="decrypt_output"></span>
-    <form id="encode" class="sec" onsubmit="return false;">
+    <form id="encrypt" class="sec" onsubmit="return false;">
       
 	<textarea name="txt"></textarea>
-	<button onclick="p.innerHTML = encrypt_message(t.value,(c.checked?'unicrap':'base64'),f.value);return false;">encrypt</button>
+	<button onclick="p.innerHTML = encrypt_message(t.value, (c.checked?'unicrap':'base64'), f.value);return false;">encrypt</button>
         for friends of 
         <select id="friendkey" name="friendkey">
         </select>
@@ -153,7 +153,7 @@
 	         || active.contenteditable
 	        ) {
 		var compress = (/twitter/.test(location) ? ';compress=true' : '');
-	        var frm = mkfrm(active.parentNode,loc+'?mode=postMessage'+compress+'#encode',101);
+	        var frm = mkfrm(active.parentNode,loc+'?mode=postMessage'+compress+'#encrypt',101);
 		var w = window;/*frm.contentWindow;*/
 		var listener = function(evt) {
 		    if (evt.source == frm.contentWindow) {
@@ -192,9 +192,9 @@
 	  //window.parent.location = x+'#foooo';
       }
 
-      if (/encode/.test(document.location.hash)) {
-          document.forms['encode'].elements['txt'].focus();
-	  document.forms['encode'].elements['compress'].checked = (
+      if (/encrypt/.test(document.location.hash)) {
+          document.forms['encrypt'].elements['txt'].focus();
+	  document.forms['encrypt'].elements['compress'].checked = (
 		  /compress=true/.test(document.location.search)
 	  );      
 	  Stor.populateKeysOnSelect(document.getElementById('friendkey'));

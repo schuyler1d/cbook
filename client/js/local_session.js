@@ -62,6 +62,11 @@
 	    return Base64._keyStr[Math.floor(x/4)];
 	}
 
+        this.getKeysByIdentifier = function(ident) {
+            var friends = JSON.parse(self.permStor.get(self.nsPEOPLE,'{}'));
+            return friends[ident];
+        }
+
 	this.keyList = function() {
 	    var key_list = [/*me-friends divider:*/['','','---------']];
 	    var me = JSON.parse(self.permStor.get(self.nsME,'{}'));
@@ -82,7 +87,7 @@
 	    for (var i=0;i<key_list.length;i++) {
 		var k=key_list[i];
 		var o=document.createElement('option');
-		o.value = k[0]+k[1];
+		o.value = k[0]+':'+k[1];
 		o.innerHTML = k[2];
 		select.appendChild(o);
 	    }
