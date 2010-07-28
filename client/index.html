@@ -27,8 +27,7 @@
 	<textarea name="txt"></textarea>
 	<button onclick="p.innerHTML = encrypt_message(t.value,(c.checked?'unicrap':'base64'),f.value);return false;">encrypt</button>
         for friends of 
-        <select name="friendkey">
-          <option value="s">mine</option>
+        <select id="friendkey" name="friendkey">
         </select>
            <input type="checkbox" name="compress" value="unicrap"><span class="small">dense unicode (for Twitter not Facebook)</span>
         <span id="authentic"></span><a href="http://github.com/schuyler1d/cbook/issues">?</a>
@@ -45,7 +44,7 @@
 	<input type="submit" value="Add Friends"/>
       </form>
 
-      <form id="generatekey" class="sec" onsubmit="Stor.generateKey(this);return false;">
+    <form id="generatekey" class="sec" onsubmit="Stor.generateKey(this);return false;">
 	<h4>Generate Your Key</h4>
 	Name or Alias:
 	<input type="text" size="30" name="alias" /><br />
@@ -188,16 +187,17 @@
       window.p = document.getElementById('output');
       var dec = document.location.hash.match(/decrypt=(.+)$/);
       if (dec!=null) {
-         document.getElementById('decrypt_output').innerHTML = decrypt_message(dec[1]);
-	 var x = window.parent.location;
-	 //window.parent.location = x+'#foooo';
+          document.getElementById('decrypt_output').innerHTML = decrypt_message(dec[1]);
+	  var x = window.parent.location;
+	  //window.parent.location = x+'#foooo';
       }
 
       if (/encode/.test(document.location.hash)) {
-         document.forms['encode'].elements['txt'].focus();
-	 document.forms['encode'].elements['compress'].checked = (
-	    /compress=true/.test(document.location.search)
-	    );      
+          document.forms['encode'].elements['txt'].focus();
+	  document.forms['encode'].elements['compress'].checked = (
+		  /compress=true/.test(document.location.search)
+	  );      
+	  Stor.populateKeysOnSelect(document.getElementById('friendkey'));
       }
       update_bookmarklet();
     </script>    
