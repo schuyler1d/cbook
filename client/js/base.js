@@ -123,11 +123,12 @@ var CBook= {
     chars:{'.':'unicrap',',':'base64'},
     unicrap:{
 	chr:'.',
-	encrypt:function(iv,ciph) {
+	encrypt:function(iv,ciph,key_numbers) {
 	    var compressed = U2N.compress(ciph.cipher);
 	    var compressed_IV = U2N.unicode(iv);
 	    //cheat on making exceptions and just try decrypt
-	    decrypt.apply(null,CBook.unicrap.decrypt(compressed_IV,compressed));
+            var decoded = CBook.unicrap.decrypt(compressed_IV,compressed);
+	    decrypt(decoded[0],decoded[1],key_numbers);
 	    return [compressed_IV, compressed];
 	},
 	decrypt:function(iv,ciphtext) {
@@ -234,7 +235,7 @@ function encrypt(plaintext, encrypt_key_numbers) {
     var crypt_args = cryptArgs(iv, encrypt_key_numbers);
     crypt_args.unshift(plaintext);
     
-    return [iv, ecmaScrypt.encrypt.apply(ecmaScrypt,crypt_args)];
+    return [iv, ecmaScrypt.encrypt.apply(ecmaScrypt,crypt_args), encrypt_key_numbers];
 }
 
 function decrypt(iv,ciph_string, encrypt_key_numbers) {
