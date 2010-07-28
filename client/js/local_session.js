@@ -63,8 +63,7 @@
 	}
 
         this.getKeysByIdentifier = function(ident) {
-            var friends = JSON.parse(self.permStor.get(self.nsPEOPLE,'{}'));
-            return friends[ident];
+            return self.friendsCache[ident];
         }
 
 	this.keyList = function() {
@@ -143,7 +142,7 @@
 	this.restoreFriends = function(friend_str) {
 
 	}
-
+        this.friendsCache = JSON.parse(self.permStor.get(self.nsPEOPLE,'{}'));
     }
 
 
