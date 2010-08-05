@@ -66,23 +66,22 @@
             return self.friendsCache[ident];
         }
 
-	this.keyList = function() {
+	this.keyList = function(limit) {
 	    var key_list = [/*me-friends divider:*/['','','---------']];
 	    var me = JSON.parse(self.permStor.get(self.nsME,'{}'));
 	    var friends = self.friendsCache || JSON.parse(self.permStor.get(self.nsPEOPLE,'{}'));
-	    
-	    for (k in friends) {
+	    for (k in friends) 
 		for (var i=0;i<friends[k].length;i++) {
 		    var secret = friends[k][i];
 		    var alias = self.getInfo(secret).alias.v;
 		    var side = ((secret in me) ?'unshift':'push');
-		    key_list[side]([k,secret,alias]);
+		    if (secret in me || !limit) 
+			key_list[side]([k,secret,alias]);
 		}
-	    }
 	    return key_list;
 	}
-	this.populateKeysOnSelect = function(select) {
-	    var key_list = self.keyList();
+	this.populateKeysOnSelect = function(select,limit) {
+	    var key_list = self.keyList(limit);
 	    for (var i=0;i<key_list.length;i++) {
 		var k=key_list[i];
 		var o=document.createElement('option');
@@ -127,8 +126,10 @@
 	this.addPrefix = function(prefix, newsecret) {
 	    var ppl = self.friendsCache||JSON.parse(self.permStor.get(self.nsPEOPLE,'{}'));
 	    ppl[prefix] = ppl[prefix] || [];
-	    ppl[prefix].push(newsecret);
-	    self.permStor.set(self.nsPEOPLE, JSON.stringify(ppl));
+	    if (ppl[prefix].indexOf(newsecret) == -1) {
+		ppl[prefix].push(newsecret);
+		self.permStor.set(self.nsPEOPLE, JSON.stringify(ppl));
+	    }
 	}
 
 	this.getInfo = function(secret) {
@@ -142,7 +143,7 @@
 	    );	    
 	}
 	this.getBackup = function(key_ary/*typeof string=all*/) {
-	    var bkup = {};
+	    var bkup = [{},JSON.parse(self.permStor.get(self.nsME,'{}'))];;
 	    if (typeof key_ary == 'undefined') {
 		key_ary = [];
 		var f = self.friendsCache;
@@ -151,7 +152,7 @@
 			key_ary.push(f[a][i]);
 	    }
 	    for (var i=0;i<key_ary.length;i++) {
-		bkup[key_ary[i]] = self.getInfo(key_ary[i]);
+		bkup[0][key_ary[i]] = self.getInfo(key_ary[i]);
 	    }
 	    return JSON.stringify(bkup);
 	}
@@ -172,14 +173,17 @@
 	      var passkey = self.passPhrase(frm.elements['passphrase'].value);
 	      var iv_ciph = CBook['base64'
 				 ].decrypt.apply(null,frm.elements['backup'].value.split(','));
-	      var restoral_keys = JSON.parse(decrypt(iv_ciph[0],iv_ciph[1], passkey));	    
-	      for (a in restoral_keys) {
-		  self.addFriend(a, restoral_keys[a]);
-	      }
+	      var restoral_keys = JSON.parse(decrypt(iv_ciph[0],iv_ciph[1], passkey));
+	      for (a in restoral_keys[0]) 
+		  self.addFriend(a, restoral_keys[0][a]);
+	      for (m in restoral_keys[1]) 
+		  self.addMyKey(restoral_keys[1][m]);
+
 	      alert('Restoral complete');
 	  } catch(e) {
 	      alert('Unable to decrypt backup');
-	      //console.log(e);
+	      if (window.console)
+		  console.log(e);
 	  }
 	}
 
