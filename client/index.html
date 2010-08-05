@@ -16,11 +16,17 @@
     background-color:#BBBBBB;
     -moz-border-radius: 8px;
     -webkit-border-radius: 8px;
-    
       } 
     </style>
   </head>
   <body>
+    <div id="menu" class="sec">
+      <a href="#backup">backup</a>
+      <a href="#restore">restore/load</a>
+      <a href="#share">share</a>
+      <a href="#encrypt">encrypt</a>
+      <a href="#generatekey">Generate a New Key</a>
+    </div>
     <span id="decrypt_output"></span>
     <form id="encrypt" class="sec" onsubmit="return false;">
       
@@ -56,8 +62,41 @@
 	</span>
         <br />
 	Drag this bookmarklet, <a class="bookmarklet" id="bookmarklet" href="">&#9812; cb&#1012;&#1012;k</a> into your browser toolbar.  Then run it, when you are on a page with the encrypted messages of your friends or after you click on a text-area to input text.
-
-
+      </form>
+      <form onsubmit="Stor.backupForm(this);return false;">
+	<div id="backup" class="sec" >
+	<p>Pass Phrase for restoral:
+	  <input type="text" name="passphrase" />
+	</p>
+	</div>
+	<p id="backup-text" class="sec">
+	  Backup text (save this text in a file on your harddrive, or email it to yourself, etc.):
+	  <textarea name="backup" rows="10" cols="40"></textarea>
+	</p>
+      </form>
+      <form id="restore" class="sec" onsubmit="Stor.restoreForm(this);return false;">
+	<p>Pass Phrase for restoral:
+	  <input type="text" name="passphrase" />
+	</p>
+	<p>Backup text:
+	  <textarea name="backup" rows="10" cols="40"></textarea>
+	</p>
+	<input type="submit" value="Restore from backup text" />
+      </form>
+      <form onsubmit="Stor.shareForm(this);return false;">
+        <div id="share" class="sec">
+	<p>Pass Phrase for restoral:
+	  <input type="text" name="passphrase" />
+	</p>
+	<p>Select the Keys you want to share
+	  <select id="sharekey" name="friendkey" multiple="multiple">
+	  </select>
+	</p>
+        </div>
+	<p id="share-text" class="sec">
+	  Share this, along with the private key
+	  <textarea name="backup" rows="10" cols="40"></textarea>
+	</p>
       </form>
     </div>
     <a class="sec" href="http://github.com/schuyler1d/cbook/issues">Report a Problem</a>
@@ -190,14 +229,15 @@
           document.getElementById('decrypt_output').innerHTML = decrypt_message(dec[1]);
 	  var x = window.parent.location;
 	  //window.parent.location = x+'#foooo';
-      }
-
-      if (/encrypt/.test(document.location.hash)) {
+      } else if (/encrypt/.test(document.location.hash)) {
           document.forms['encrypt'].elements['txt'].focus();
 	  document.forms['encrypt'].elements['compress'].checked = (
 		  /compress=true/.test(document.location.search)
 	  );      
 	  Stor.populateKeysOnSelect(document.getElementById('friendkey'));
+      } else {
+	  document.getElementById('menu').style.display = 'block';
+	  Stor.populateKeysOnSelect(document.getElementById('sharekey'));	  
       }
       update_bookmarklet();
     </script>    

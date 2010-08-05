@@ -204,7 +204,7 @@ function decrypt_message(crypted) {
     return retval;
 }
 function encrypt_message(plaintext, mode, key_and_ref) {
-    mode = mode || 'hex';
+    mode = mode || 'base64';
     var key_ref = key_and_ref.substr(0,1),
         key = Base64.decodeBytes(key_and_ref.substr(2)),
         tries = 200,

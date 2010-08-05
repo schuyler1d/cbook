@@ -69,7 +69,7 @@
 	this.keyList = function() {
 	    var key_list = [/*me-friends divider:*/['','','---------']];
 	    var me = JSON.parse(self.permStor.get(self.nsME,'{}'));
-	    var friends = JSON.parse(self.permStor.get(self.nsPEOPLE,'{}'));
+	    var friends = self.friendsCache || JSON.parse(self.permStor.get(self.nsPEOPLE,'{}'));
 	    
 	    for (k in friends) {
 		for (var i=0;i<friends[k].length;i++) {
@@ -111,7 +111,7 @@
 	    prefix = prefix || self.getKeyIdentifier(newsecret);
 	    var key = self.nsPERSON + newsecret;
 	    if (self.permStor.hasKey(key)) {
-		var old_person = self.permStor.get(key);
+		var old_person = JSON.parse(self.permStor.get(key));
 		if (NOT(obj.alias && obj.alias.v)
 		    || NOT(confirm('You are about to overwrite a preexisting friend/account in your database, Their alias is '+old_person.alias.v+'. The new alias is '+obj.alias.v))) {
 		    return;
@@ -121,27 +121,68 @@
 		return; //atm, don't support friends w/o aliases
 	    }
 	    self.permStor.set(key, JSON.stringify(obj));
-	    self.addPrefix(prefix, newsecret, self.nsPEOPLE);
+	    self.addPrefix(prefix, newsecret);
 	}
 
-	this.addPrefix = function(prefix, newsecret, namespace) {
-	    var ppl = JSON.parse(self.permStor.get(namespace,'{}'));
+	this.addPrefix = function(prefix, newsecret) {
+	    var ppl = self.friendsCache||JSON.parse(self.permStor.get(self.nsPEOPLE,'{}'));
 	    ppl[prefix] = ppl[prefix] || [];
 	    ppl[prefix].push(newsecret);
-	    self.permStor.set(namespace, JSON.stringify(ppl));
+	    self.permStor.set(self.nsPEOPLE, JSON.stringify(ppl));
 	}
 
 	this.getInfo = function(secret) {
 	    return JSON.parse(self.permStor.get(self.nsPERSON+secret,'{}'));
 	}
 
-	this.backupFriends = function() {
-	    
+	this.passPhrase = function(text) {
+	    return ecmaScrypt.generatePrivateKey(
+		text,
+		ecmaScrypt.aes.keySize.SIZE_128
+	    );	    
+	}
+	this.getBackup = function(key_ary/*typeof string=all*/) {
+	    var bkup = {};
+	    if (typeof key_ary == 'undefined') {
+		key_ary = [];
+		var f = self.friendsCache;
+		for (a in f) 
+		    for (var i=0;i<f[a].length;i++) 
+			key_ary.push(f[a][i]);
+	    }
+	    for (var i=0;i<key_ary.length;i++) {
+		bkup[key_ary[i]] = self.getInfo(key_ary[i]);
+	    }
+	    return JSON.stringify(bkup);
+	}
+	this.backupForm = function(frm) {
+	    var eee = frm.elements;
+	    var passkey = self.passPhrase(eee['passphrase'].value);
+	    var json_backup = self.getBackup();
+	    //var iv_ciph = CBook['base64'].encrypt.apply(null,encrypt(json_backup, passkey));	    
+	    //console.log(iv_ciph);
+	    eee['backup'].value = CBook['base64'
+				       ].encrypt.apply(null,encrypt(json_backup, passkey));	    
+	    document.location = '#backup-text';
+
 	}
 
-	this.restoreFriends = function(friend_str) {
-
+	this.restoreForm = function(frm) {
+	  try {
+	      var passkey = self.passPhrase(frm.elements['passphrase'].value);
+	      var iv_ciph = CBook['base64'
+				 ].decrypt.apply(null,frm.elements['backup'].value.split(','));
+	      var restoral_keys = JSON.parse(decrypt(iv_ciph[0],iv_ciph[1], passkey));	    
+	      for (a in restoral_keys) {
+		  self.addFriend(a, restoral_keys[a]);
+	      }
+	      alert('Restoral complete');
+	  } catch(e) {
+	      alert('Unable to decrypt backup');
+	      //console.log(e);
+	  }
 	}
+
         this.friendsCache = JSON.parse(self.permStor.get(self.nsPEOPLE,'{}'));
     }
 
