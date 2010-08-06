@@ -142,9 +142,9 @@
 		ecmaScrypt.aes.keySize.SIZE_128
 	    );	    
 	}
-	this.getBackup = function(key_ary/*typeof string=all*/) {
+	this.getBackup = function(key_ary/*typeof string=all*/, passkey) {
 	    var bkup = [{},JSON.parse(self.permStor.get(self.nsME,'{}'))];;
-	    if (typeof key_ary == 'undefined') {
+	    if (typeof key_ary == 'string') {
 		key_ary = [];
 		var f = self.friendsCache;
 		for (a in f) 
@@ -154,20 +154,20 @@
 	    for (var i=0;i<key_ary.length;i++) {
 		bkup[0][key_ary[i]] = self.getInfo(key_ary[i]);
 	    }
-	    return JSON.stringify(bkup);
+	    if (passkey) {
+		return CBook['base64'
+			    ].encrypt.apply(null,encrypt(JSON.stringify(bkup), 
+							 passkey));
+	    } else
+		return JSON.stringify(bkup);
 	}
 	this.backupForm = function(frm) {
 	    var eee = frm.elements;
 	    var passkey = self.passPhrase(eee['passphrase'].value);
-	    var json_backup = self.getBackup();
-	    //var iv_ciph = CBook['base64'].encrypt.apply(null,encrypt(json_backup, passkey));	    
-	    //console.log(iv_ciph);
-	    eee['backup'].value = CBook['base64'
-				       ].encrypt.apply(null,encrypt(json_backup, passkey));	    
+	    eee['backup'].value = self.getBackup('all',passkey);
 	    document.location = '#backup-text';
 
 	}
-
 	this.restoreForm = function(frm) {
 	  try {
 	      var passkey = self.passPhrase(frm.elements['passphrase'].value);
@@ -186,7 +186,19 @@
 		  console.log(e);
 	  }
 	}
-
+	this.shareForm = function(frm) {
+	    var key_list = [];
+	    var eee = frm.elements;
+	    var passkey = self.passPhrase(eee['passphrase'].value);
+	    var o = eee['friendkey'].options;
+	    for (var i=0;i<o.length;i++) {
+		if (o[i].selected) {
+		    key_list.push(o[i].value);
+		}
+	    }
+	    eee['backup'].value = self.getBackup(key_list,passkey);
+	    document.location="#share-text";
+	}
         this.friendsCache = JSON.parse(self.permStor.get(self.nsPEOPLE,'{}'));
     }
 

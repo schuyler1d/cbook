@@ -26,6 +26,7 @@
       <a href="#share">share</a>
       <a href="#encrypt">encrypt</a>
       <a href="#generatekey">Generate a New Key</a>
+      <a href="http://github.com/schuyler1d/cbook/issues">Report a Problem</a>
     </div>
     <span id="decrypt_output"></span>
     <form id="encrypt" class="sec" onsubmit="return false;">
@@ -55,10 +56,9 @@
 	Name or Alias:
 	<input type="text" size="30" name="alias" /><br />
 	<input type="submit" value="Generate your Friends-Key" /><br />
-	<span id="keylinksec" class="hide">
+	<span id="keylinksec" class="sec">
 	  Share this link with all your friends.  
-	  <a id="keylink" class="hide" href="#foo">link for friends</a>
-	  
+	  <a id="keylink" href="#foo">link for friends</a>
 	</span>
         <br />
 	Drag this bookmarklet, <a class="bookmarklet" id="bookmarklet" href="">&#9812; cb&#1012;&#1012;k</a> into your browser toolbar.  Then run it, when you are on a page with the encrypted messages of your friends or after you click on a text-area to input text.
@@ -83,7 +83,7 @@
 	</p>
 	<input type="submit" value="Restore from backup text" />
       </form>
-      <form onsubmit="Stor.shareForm(this);return false;">
+      <form name="share" onsubmit="Stor.shareForm(this);return false;">
         <div id="share" class="sec">
 	<p>Pass Phrase for restoral:
 	  <input type="text" name="passphrase" />
@@ -91,15 +91,18 @@
 	<p>Select the Keys you want to share
 	  <select id="sharekey" name="friendkey" multiple="multiple">
 	  </select>
+	  <input type="submit" value="Create secure share info" />
 	</p>
         </div>
 	<p id="share-text" class="sec">
-	  Share this, along with the private key
+        Share this, along with the private key with your friends, ideally 
+	through separate channels (that would not collude).  For example,
+	send one from your web email, and another over a different instant message network.
+	(They shouldn't both be owned by the same company)
 	  <textarea name="backup" rows="10" cols="40"></textarea>
 	</p>
       </form>
     </div>
-    <a class="sec" href="http://github.com/schuyler1d/cbook/issues">Report a Problem</a>
 
     <script type="text/javascript" src="js/base64.js"></script>
     <script type="text/javascript" src="js/ecmascrypt_v003.js"></script>
@@ -237,7 +240,7 @@
 	  Stor.populateKeysOnSelect(document.getElementById('friendkey'));
       } else {
 	  document.getElementById('menu').style.display = 'block';
-	  Stor.populateKeysOnSelect(document.getElementById('sharekey'));	  
+	  Stor.populateKeysOnSelect(document.getElementById('sharekey'),'shareable');	  
       }
       update_bookmarklet();
     </script>    
