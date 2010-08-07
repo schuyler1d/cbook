@@ -72,6 +72,11 @@
 	<p id="backup-text" class="sec">
 	  Backup text (save this text in a file on your harddrive, or email it to yourself, etc.):
 	  <textarea name="backup" rows="10" cols="40"></textarea>
+	    Now that you can back things up by pasting this text somewhere, do you 
+	    want to delete all your keys from this browser?
+	    <input type="button" 
+		   onclick="Stor.deleteEverything(this);return false;"
+		   value="Delete All Keys from Browser" />
 	</p>
       </form>
       <form id="restore" class="sec" onsubmit="Stor.restoreForm(this);return false;">

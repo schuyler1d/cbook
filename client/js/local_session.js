@@ -199,6 +199,14 @@
 	    eee['backup'].value = self.getBackup(key_list,passkey);
 	    document.location="#share-text";
 	}
+	this.deleteEverything = function() {
+	    if (confirm("Are you sure you want to delete all your keys from this browser?")) {
+		self.permStor.deleteEveryFuckingThing();
+		alert("Your keys have been removed. Don't lose your backup!");
+	    }
+	}
+
+
         this.friendsCache = JSON.parse(self.permStor.get(self.nsPEOPLE,'{}'));
     }
 
