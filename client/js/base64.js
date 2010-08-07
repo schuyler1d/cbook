@@ -79,7 +79,7 @@ var Base64 = {
 		var enc1, enc2, enc3, enc4;
 		var i = 0;
  
-	    input = input.replace(RegExp('[^'+this._keyStr+']','g'), "");
+	    input = input.replace(RegExp('[^'+this._keyStr.replace('-','\\-')+']','g'), "");
  
 		while (i < input.length) {
 		    var chr=this._chars2bytes(input.substr(i,4));
