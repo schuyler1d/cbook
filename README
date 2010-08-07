@@ -1,0 +1,89 @@
+project: cbook
+code: http://github.com/schuyler1d/cbook/
+author: Schuyler Duveen (sky@skyb.us)
+license: GPLv3 or higher
+
+Description:
+Cbook is a means for encrypting/decrypting messages over social networks like
+Facebook and Twitter with the goal to keep your hosting social network in the
+dark about everything you say.  Thus, you do not depend on them for keeping
+your private things private.  Decryption information is maintained in your browser 
+(so only use this on computers/devices you own)
+
+Security Description
+---------------------
+* Your keys and your friends' keys are stored in your browser.
+* They are NOT stored on the host where you copy the bookmark.
+  (though, even though the current code makes it difficult some
+  evil changes to it, would allow someone to copy the keys.
+  This security issue is solved if you use the page on your local
+  computer.
+  In the future, a browser plugin and possibly some other checks
+  will make it easier
+
+User Description
+---------------------
+Currently supporting Firefox and Google Chrome:
+
+1. install the ./client directory somewhere on the web (if you are using Google Chrome, you can install it on your harddrive), and point your webbrowser there.
+
+2. Click to "Generate Key" and create a personal key with your 'Alias' 
+(your name is fine, or a web handle).  You will share
+this key with your friends, and then encrypt messages with it.  If they want
+to encrypt a message to YOUR friends (e.g. when replying to one of your posts), 
+they will also use this key.  It does NOT prove that the message comes from you.
+
+Add the cbook bookmarklet by dragging it onto your browser bookmarks toolbar.
+
+3. To share your key with your friends, click Share:
+   3a. Enter a passphrase (the longer the better--maybe a favoriate quote)
+   3b. Select your key from the menu
+   3c. Click "Create secure share info"
+   3d. send your friend:
+       i. the long text string in the text box
+       ii. a link to your website's copy of cbook
+           OR to cbook, so they can download and install it themselves.
+       iii. Through a DIFFERENT CHANNEL (i.e. not the same social network,
+            maybe the phone, in person, or an email)
+	    communicate to them the passphrase
+
+4. To load in a friend's private key into your browser
+   3a. Copy the encrypted text on your clipboard
+   3b. visit your cbook page and click 'restore/load'
+   3c. paste the encrypted text into your clipboard and
+       type n the passphrase.  then click "Restore from backup text"
+
+5. To decrypt messages, when visiting a webpage that has messages,
+   run the cbook bookmarklet
+
+6. If you're about to give up your computer to someone else, and you don't
+   want them to have access to your cbook keys, then you can delete them.
+   6a. First click backup from your cbook page
+   6b. Copy the text area result to someplace private.
+   6c. Then click the "Delete All Keys from Browser"
+
+Technical Description
+---------------------
+Using symmetric AES 128-bit keys we encrypt/decrypt messages.
+The justifications for using symmetric AES128bit instead of public-key crypto are:
+1. Symmetric keys means that we do not have to send a message per-friend
+2. Public-key crypto is not available client-side on the browser (hopefully, this 
+   will change)
+3. The minimum block-size for public-key encrypted text will not fit in a Tweet.
+4. In the future, people can share their symmetric key over a public-key-encrypted
+message, which will remove the hacky issues of the pass-phrase 
+multi-band dependency
+5. Symmetric keys actually makes it easier to recover from someone 'losing' their
+   key(s).  This way they can recover by asking their friends for a copy of their
+   key back.
+6. This presumes that authentication/authorization is done by the social
+   network platform.
+
+Messages are identified with a regex starting with the unicode crown.
+Encrypted text is sent on an iframe's src's url hash.
+Thus:
+	1. Due to browser security domains, the current site will not be able
+	to read the decrypted strings
+	2. Since it's on the hash, it's not sent to the hosting server 
+	   and cannot appear in the logs.
+
