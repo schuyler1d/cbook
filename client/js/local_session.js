@@ -56,7 +56,7 @@
 	this.nsPEOPLE = 'CBOOK_PEOPLE';
 	this.nsME = 'MY_KEYS';
 
-	this.getKeyIdentifier = function(key_base64) {
+	this.getKeyIdentifier = function(key_base64, obj) {
 	    ///first two bytes of the sha256 hash of the key in base64;
 	    var x = parseInt(ecmaScrypt.sha2.hex_sha256(key_base64).substr(0,2),16);
 	    return Base64._keyStr[Math.floor(x/4)];
@@ -92,10 +92,10 @@
 	}
 	this.generateKey = function(frm) {
 	    var newsecret = Base64.encodeBytes(ecmaScrypt.generateSharedKey(ecmaScrypt.aes.keySize.SIZE_128));
-	    var prefix = self.getKeyIdentifier(newsecret);
+	    var obj = {"alias":{"v":alias,"p":"friends"}};
+	    var prefix = self.getKeyIdentifier(newsecret, obj);
 	    var alias = frm.elements['alias'].value;
 	    ///v:value, p:privacy
-	    var obj = {"alias":{"v":alias,"p":"friends"}};
 	    self.addMyKey(newsecret, obj, prefix);
 	    self.addFriend(newsecret, obj, prefix);
 	    alert('New key generated.');
@@ -107,7 +107,7 @@
 	}
 
 	this.addFriend = function(newsecret, obj, prefix) {
-	    prefix = prefix || self.getKeyIdentifier(newsecret);
+	    prefix = prefix || self.getKeyIdentifier(newsecret, obj);
 	    var key = self.nsPERSON + newsecret;
 	    if (self.permStor.hasKey(key)) {
 		var old_person = JSON.parse(self.permStor.get(key));
