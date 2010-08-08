@@ -92,9 +92,9 @@
 	}
 	this.generateKey = function(frm) {
 	    var newsecret = Base64.encodeBytes(ecmaScrypt.generateSharedKey(ecmaScrypt.aes.keySize.SIZE_128));
+	    var alias = frm.elements['alias'].value;
 	    var obj = {"alias":{"v":alias,"p":"friends"}};
 	    var prefix = self.getKeyIdentifier(newsecret, obj);
-	    var alias = frm.elements['alias'].value;
 	    ///v:value, p:privacy
 	    self.addMyKey(newsecret, obj, prefix);
 	    self.addFriend(newsecret, obj, prefix);
@@ -116,6 +116,7 @@
 		    return;
 		}
 	    }
+	    
 	    if (NOT(obj.alias && obj.alias.v)) {
 		return; //atm, don't support friends w/o aliases
 	    }
