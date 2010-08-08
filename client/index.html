@@ -242,10 +242,10 @@
 	  document.forms['encrypt'].elements['compress'].checked = (
 		  /compress=true/.test(document.location.search)
 	  );      
-	  Stor.populateKeysOnSelect(document.getElementById('friendkey'));
+	  Stor.populateKeysOnSelect('friendkey');
       } else {
 	  document.getElementById('menu').style.display = 'block';
-	  Stor.populateKeysOnSelect(document.getElementById('sharekey'),'shareable');	  
+	  Stor.populateKeysOnSelect('sharekey','shareable');	  
       }
       update_bookmarklet();
     </script>    

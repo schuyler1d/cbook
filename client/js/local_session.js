@@ -80,7 +80,9 @@
 		}
 	    return key_list;
 	}
-	this.populateKeysOnSelect = function(select,limit) {
+	this.populateKeysOnSelect = function(select_id,limit) {
+	    var select = document.getElementById(select_id);
+	    select.innerHTML = '';
 	    var key_list = self.keyList(limit);
 	    for (var i=0;i<key_list.length;i++) {
 		var k=key_list[i];
@@ -99,6 +101,7 @@
 	    self.addMyKey(newsecret, obj, prefix);
 	    self.addFriend(newsecret, obj, prefix);
 	    alert('New key generated.');
+	    self.refreshForms();
 	}
 	this.addMyKey = function(secret) {
 	    var keys = JSON.parse(self.permStor.get(self.nsME,'{}'));
@@ -132,7 +135,10 @@
 		self.permStor.set(self.nsPEOPLE, JSON.stringify(ppl));
 	    }
 	}
-
+	this.refreshForms = function() {
+	    Stor.populateKeysOnSelect('friendkey');
+	    Stor.populateKeysOnSelect('sharekey','shareable');
+	}
 	this.getInfo = function(secret) {
 	    return JSON.parse(self.permStor.get(self.nsPERSON+secret,'{}'));
 	}
@@ -151,11 +157,14 @@
 		for (a in f) 
 		    for (var i=0;i<f[a].length;i++) 
 			key_ary.push(f[a][i]);
+	    } else {
+		bkup[1]={};
 	    }
 	    for (var i=0;i<key_ary.length;i++) {
 		bkup[0][key_ary[i]] = self.getInfo(key_ary[i]);
 	    }
 	    if (passkey) {
+		console.log(bkup);
 		return CBook['base64'
 			    ].encrypt.apply(null,encrypt(JSON.stringify(bkup), 
 							 passkey));
@@ -181,6 +190,7 @@
 		  self.addMyKey(restoral_keys[1][m]);
 
 	      alert('Restoral complete');
+	      self.refreshForms();
 	  } catch(e) {
 	      alert('Unable to decrypt backup');
 	      if (window.console)
