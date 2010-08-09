@@ -75,7 +75,7 @@
 		    var secret = friends[k][i];
 		    var alias = self.getInfo(secret).alias.v;
 		    var side = ((secret in me) ?'unshift':'push');
-		    if (secret in me || !limit) 
+		    if (!limit ||secret in me) 
 			key_list[side]([k,secret,alias]);
 		}
 	    return key_list;
@@ -164,7 +164,6 @@
 		bkup[0][key_ary[i]] = self.getInfo(key_ary[i]);
 	    }
 	    if (passkey) {
-		console.log(bkup);
 		return CBook['base64'
 			    ].encrypt.apply(null,encrypt(JSON.stringify(bkup), 
 							 passkey));
