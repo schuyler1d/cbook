@@ -17,7 +17,7 @@ var crypted_regex = new RegExp(crypted_regex_str,'g');
 
 var global= {
     FAIL_ENCODING:'Failed to decrypt message, likely due to encoding problems.<br />',
-    FAIL_NOKEY:'None of your saved keys could decrypt this message.<br />'
+    FAIL_NOKEY:'None of your keys could decrypt this message.<br />'
 }
 function cryptArgs(iv, encrypt_key_numbers) {
     ///see http://www.josh-davis.org/ecmascrypt

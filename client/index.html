@@ -29,7 +29,7 @@
       <a href="http://github.com/schuyler1d/cbook/issues">Report a Problem</a>
     </div>
     <span id="decrypt_output"></span>
-    <form id="encrypt" class="sec" onsubmit="return false;">
+    <form id="encrypt" name="encrypt" class="sec" onsubmit="return false;">
       
 	<textarea name="txt"></textarea>
 	<button onclick="p.innerHTML = encrypt_message(t.value, (c.checked?'unicrap':'base64'), f.value);return false;">encrypt</button>
@@ -51,7 +51,7 @@
 	<input type="submit" value="Add Friends"/>
       </form>
 
-    <form id="generatekey" class="sec" onsubmit="Stor.generateKey(this);return false;">
+    <form name="generatekey" id="generatekey" class="sec" onsubmit="Stor.generateKey(this);return false;">
 	<h4>Generate Your Key</h4>
 	Name or Alias:
 	<input type="text" size="30" name="alias" /><br />
@@ -108,11 +108,15 @@
 	</p>
       </form>
     </div>
+    <ul id="test" class="sec">
+      <li><form name="test" onsubmit="Tester.run();return false;"><button>Run Tests</button></form></li>
+    </ul>
 
     <script type="text/javascript" src="js/base64.js"></script>
     <script type="text/javascript" src="js/ecmascrypt_v003.js"></script>
     <script type="text/javascript" src="js/local_session.js"></script>
     <script type="text/javascript" src="js/cbook.js"></script>
+    <script type="text/javascript" src="js/test.js"></script>
 
     <script type="text/javascript" id="bookmarklet_source">
       function bookmarklet(loc,friends) {
