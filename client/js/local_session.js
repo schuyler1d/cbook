@@ -107,9 +107,9 @@
 	    self.refreshForms();
 	}
 	this.addMyKey = function(secret) {
-	    var keys = JSON.parse(self.permStor.get(self.nsME,'{}'));
-	    keys[secret]=1;
-	    self.permStor.set(self.nsME, JSON.stringify(keys));
+	    var me = JSON.parse(self.permStor.get(self.nsME,'{}'));
+	    me[secret]=1;
+	    self.permStor.set(self.nsME, JSON.stringify(me));
 	}
 
 	this.addFriend = function(newsecret, obj, prefix) {
@@ -129,6 +129,22 @@
 	    self.permStor.set(key, JSON.stringify(obj));
 	    self.addPrefix(prefix, newsecret);
 	}
+        
+        this.removeKey = function(secret_n_prefix) {
+            var prefix = secret_n_prefix[0];
+            var secret = secret_n_prefix.substr(2);
+            //delete from key list
+            var ppl = self.friendsCache||JSON.parse(self.permStor.get(self.nsPEOPLE,'{}'));
+            ppl[prefix].splice(ppl[prefix].indexOf(secret),1);
+
+            self.permStor.set(self.nsPEOPLE, JSON.stringify(ppl));
+            //delete from private list  -- should we do this?  if you delete/restore....
+            var me = JSON.parse(self.permStor.get(self.nsME,'{}'));
+            delete me[secret];
+            self.permStor.set(self.nsME, JSON.stringify(me));
+            //delete data
+            self.permStor.del(self.nsPERSON+secret);
+        }
 
 	this.addPrefix = function(prefix, newsecret) {
 	    var ppl = self.friendsCache||JSON.parse(self.permStor.get(self.nsPEOPLE,'{}'));

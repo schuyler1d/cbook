@@ -39,6 +39,7 @@ var Tester = new (function runTests() {
 	if (!true_v) throw Error("Failed on: "+msg)
     }
     var vv = this.vars = {
+        original_keylistcount:0,
 	key1_alias:'key1_test_alias',
 	key1_secret:null,
 	key2_alias:'key2_test_alias',
@@ -54,6 +55,9 @@ var Tester = new (function runTests() {
     this.tests = [
 	/// #1   -*create key1
 	function create_key1() {
+            vv.original_keylistcount = Stor.keyList().length
+            vv.original_keylist = Stor.keyList()
+
 	    self.test_createKey = function(vv_prefix) {
 		//setup
 		var frm= document.forms['generatekey']
@@ -144,9 +148,12 @@ var Tester = new (function runTests() {
 	    }
 	    self.test_deleteEverything()
 	},
-	/// #7   ?restore from full
-	/// #8      test alias, user
-	function restoreFromFull() {
+	/// #11  -*create key2
+	function create_key2() {
+	    self.test_createKey('key2')
+	},
+	/// #12  ?restore from share
+	function restore_from_share() {
 	    self.test_restore = function(bk_pass,bk_str) {
 		var frm= document.forms['restore']
 		frm.elements['passphrase'].value = vv[bk_pass]
@@ -158,26 +165,12 @@ var Tester = new (function runTests() {
 		var user = Stor.getInfo(user_secret)
 		assert(user.alias,'has alias')
 		assert(user.alias.v==vv.key1_alias,'alias was correctly restored')
+                assert(Stor.friendsCache[vv.key1_secret[0]].indexOf(user_secret)>=0,
+                       'same prefix was created')
 		return user_secret
 	    }
-	    var user_secret = self.test_restore('backup_passphrase','backup_string')
-	    assert(Stor.isMyKey(user_secret),'labeled as my key')
-	},
-	/// #9   ?decrypt message
-	function decrypt_after_restoral() {
-	    self.dec_test_func()
-	},
-	/// #10  -delete everything again
-	function delete_everything_again() {
-	    self.test_deleteEverything()
-	},
-	/// #11  -*create key2
-	function create_key2() {
-	    self.test_createKey('key2')
-	},
-	/// #12  ?restore from share
-	function restore_from_share() {
-	    self.test_restore('backup_passphrase','share_string')
+	    var user_secret = self.test_restore('backup_passphrase','share_string')
+	    assert( !Stor.isMyKey(user_secret),'not labeled as my key')
 	},
         /// #13  ?decrypt message
         function decrypt_message_fromshare() {
@@ -189,6 +182,27 @@ var Tester = new (function runTests() {
 	    vv.msg2_encrypted = encrypt_message(vv.msg1_plaintext,'base64',vv.key2_secret)       
             assert(vv.msg1_plaintext+'<br />' == decrypt_message(vv.msg2_encrypted),
                    'encryption/decyption on key2 after loading shared backup')
+        },
+	/// #10  -delete everything again
+	function delete_everything_again() {
+	    self.test_deleteEverything()
+	},
+	/// #7   ?restore from full
+	/// #8      test alias, user
+	function restoreFromFull() {
+	    var user_secret = self.test_restore('backup_passphrase','backup_string')
+	    assert(Stor.isMyKey(user_secret),'labeled as my key')
+	},
+	/// #9   ?decrypt message
+	function decrypt_after_restoral() {
+	    self.dec_test_func()
+	},
+        /// #15 -delete test keys
+        function try_restoring_state() {
+            Stor.removeKey(vv.key1_secret)
+            //Stor.removeKey(vv.key2_secret) //already deleted by restoring just backup 1
+            assert(vv.original_keylistcount==Stor.keyList().length,
+                   'keylist count is same as original')
         }
     ]
 })()
