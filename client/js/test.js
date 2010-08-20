@@ -21,41 +21,43 @@ var Tester = new (function runTests() {
 	testdom = document.getElementById('test')
     this.run = function() {
 	for (var i=0;i<self.tests.length;i++) {
+	    var name = i+' '+self.tests[i].name;
 	    try {
-		self.msg(i,self.tests[i](),false)
+		self.msg(name,self.tests[i](),false)
 	    } catch(e) {
-		self.msg(i,e.message,true)
+		self.msg(name,e.message,true)
 	    }
 	}
     }
-    this.ok = function(i) {}
-    this.fail = function(i,msg) {}
-    this.msg = function(i,msg,fail) {
+    this.msg = function(name,msg,fail) {
 	var li = document.createElement('li')
 	testdom.appendChild(li)
-	li.innerHTML = i+' '+(msg||'')
+	li.innerHTML = name+' '+(msg||'')
 	li.style.backgroundColor = ((fail)?'red':'green')
     }
     function assert(true_v, msg) {
 	if (!true_v) throw Error("Failed on: "+msg)
     }
     this.vars = {
-	key1_alias:'key1_alias'
+	key1_alias:'key1_alias',
+	key1_secret:null,
+	msg1_plaintext:'Foo and Bar and Hello',
+	msg1_encrypted:null
     }
     this.tests = [
 	/// #1   -*create key1
 	function create_key1() {
+	    //setup
 	    var frm= document.forms['generatekey']
 	    frm.elements['alias'].value = self.vars.key1_alias
-	    frm.submit()
+	    Stor.generateKey(frm) //submit
 
-	    //tests:
+	    //tests
 	    var keys = Stor.keyList()
 	    assert(keys.length > 1,'some key exists')
 	    var found_key = false,
 	        o = document.forms['encrypt'].elements['friendkey'].options
 	    for (var i=0;i<keys.length;i++) { 
-		console.log(keys[i][2])
 		if (keys[i][2] == self.vars.key1_alias) {
 		    found_key = true
 		    break
@@ -70,14 +72,27 @@ var Tester = new (function runTests() {
 		    break
 		}
 	    assert(found_key, 'key alias is in encrypt form')
-	    
-	    
 	},
 	/// #2   -*encrypt message
 	function encrypt_msg() {
-	    
+	    self.vars.msg1_encrypted = encrypt_message(
+		self.vars.msg1_plaintext,
+		'base64',
+		self.vars.key1_secret)
+	    self.msg('--plaintext:',self.vars.msg1_plaintext)
+	    self.msg('--crypt:',self.vars.msg1_encrypted)
+	    assert(crypted_regex.test(self.vars.msg1_encrypted),
+		   'encrypted message is proper form:'+self.vars.msg1_encrypted)
+	},
+	/// #3   ?decrypt message
+	function decrypt_msg() {
+	    self.msg(decrypt_message);
+	    self.msg(self.vars.msg1_encrypted)
+	    self.msg(decrypt_message(self.vars.msg1_encrypted))
+	    var plain = decrypt_message(self.vars.msg1_encrypted)
+	    assert(plain.length,'decrypted message is non-empty')
+	    assert(plain == self.vars.msg1_plaintext,'Decrypted message==original:')
 	}
-/// #3   ?decrypt message
 /// #4   -*full backup 
 /// #5   -*share
 
