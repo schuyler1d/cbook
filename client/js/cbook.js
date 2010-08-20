@@ -1,7 +1,6 @@
 var crypted_regex_str = String.fromCharCode(9812)+'([.,_])([^<>?&"\']) ([^:<>?&"\']+):([^:<>?&"\']+):?',
 regex_args = ['codec','hash','iv','ciphtext'],
 html_regex = '<([:\\w]+)[^<]+';
-var crypted_regex = new RegExp(crypted_regex_str,'g');
 
 /*
   facebook: document.getElementsByClassName('uiStreamMessage')
@@ -176,10 +175,10 @@ function test_unicode(txt,f) {
 function decrypt_message(crypted) {
     var x;
     var retval = '';
+    var crypted_regex = new RegExp(crypted_regex_str,'g');
     while ((x = crypted_regex.exec(crypted)) != null) {
         var friend_keys = Stor.getKeysByIdentifier(x[2]),
-            cbook_method = CBook[CBook.chars[x[1]]],
-            success = false;
+            cbook_method = CBook[CBook.chars[x[1]]];
         if (!friend_keys || !friend_keys.length ) {
             retval += global.FAIL_NOKEY;
             continue;

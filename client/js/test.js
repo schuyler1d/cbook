@@ -38,18 +38,19 @@ var Tester = new (function runTests() {
     function assert(true_v, msg) {
 	if (!true_v) throw Error("Failed on: "+msg)
     }
-    this.vars = {
+    var vv = {
 	key1_alias:'key1_alias',
 	key1_secret:null,
 	msg1_plaintext:'Foo and Bar and Hello',
-	msg1_encrypted:null
+	msg1_encrypted:null,
+	msg1_encrypted_uni:null
     }
     this.tests = [
 	/// #1   -*create key1
 	function create_key1() {
 	    //setup
 	    var frm= document.forms['generatekey']
-	    frm.elements['alias'].value = self.vars.key1_alias
+	    frm.elements['alias'].value = vv.key1_alias
 	    Stor.generateKey(frm) //submit
 
 	    //tests
@@ -58,7 +59,7 @@ var Tester = new (function runTests() {
 	    var found_key = false,
 	        o = document.forms['encrypt'].elements['friendkey'].options
 	    for (var i=0;i<keys.length;i++) { 
-		if (keys[i][2] == self.vars.key1_alias) {
+		if (keys[i][2] == vv.key1_alias) {
 		    found_key = true
 		    break
 		}
@@ -66,34 +67,35 @@ var Tester = new (function runTests() {
 	    assert(found_key, 'key alias is in DB')
 	    found_key = false
 	    for (var i=0;i<o.length;i++) 
-		if (o[i].innerHTML == self.vars.key1_alias) {
+		if (o[i].innerHTML == vv.key1_alias) {
 		    found_key = true
-		    self.vars.key1_secret = o[i].value
+		    vv.key1_secret = o[i].value
 		    break
 		}
 	    assert(found_key, 'key alias is in encrypt form')
 	},
 	/// #2   -*encrypt message
 	function encrypt_msg() {
-	    self.vars.msg1_encrypted = encrypt_message(
-		self.vars.msg1_plaintext,
-		'base64',
-		self.vars.key1_secret)
-	    self.msg('--plaintext:',self.vars.msg1_plaintext)
-	    self.msg('--crypt:',self.vars.msg1_encrypted)
-	    assert(crypted_regex.test(self.vars.msg1_encrypted),
-		   'encrypted message is proper form:'+self.vars.msg1_encrypted)
+	    vv.msg1_encrypted = encrypt_message(vv.msg1_plaintext,'base64',vv.key1_secret)
+	    vv.msg1_encrypted_uni = encrypt_message(vv.msg1_plaintext,'unicrap',vv.key1_secret)
+	    //self.msg('--plaintext:',vv.msg1_plaintext)
+	    //self.msg('--crypt:',vv.msg1_encrypted)
+	    var crypted_regex = new RegExp(crypted_regex_str,'g');
+	    assert(crypted_regex.test(vv.msg1_encrypted),
+	    	   'encrypted message is proper form:'+vv.msg1_encrypted)
 	},
 	/// #3   ?decrypt message
 	function decrypt_msg() {
-	    self.msg(decrypt_message);
-	    self.msg(self.vars.msg1_encrypted)
-	    self.msg(decrypt_message(self.vars.msg1_encrypted))
-	    var plain = decrypt_message(self.vars.msg1_encrypted)
+	    var plain = decrypt_message(vv.msg1_encrypted)
 	    assert(plain.length,'decrypted message is non-empty')
-	    assert(plain == self.vars.msg1_plaintext,'Decrypted message==original:')
+	    assert(plain == vv.msg1_plaintext+ '<br />','Decrypted base64 message ==original:')
+	    assert(decrypt_message(vv.msg1_encrypted_uni)==vv.msg1_plaintext+'<br />',
+		   'Decrypted unicrap message ==original:')
+	},
+	/// #4   -*full backup 
+	function full_backup() {
+	    
 	}
-/// #4   -*full backup 
 /// #5   -*share
 
 /// #6   -delete everything
