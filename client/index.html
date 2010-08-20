@@ -173,11 +173,14 @@
                           frm_loc += m[0];
                       } while ((m = crypted_regex.exec(local_str)) != null);
                       var frm = mkfrm(textNode.parentNode, frm_loc);
-                  } else if (n!=null) {	/*for facebook, which breaks up long words*/
+                  } else if (n!=null) {	
+                      /*for facebook, which breaks up long words
+                        mysteriously,that also means we track the second regex.exec()
+                       */
                       nodes.push(textNode);
-                      do {
+                      while ((n = crypted_regex.exec(higher_str)) != null) {
                           frm_loc += n[0];
-                      } while ((n = crypted_regex.exec(higher_str)) != null);
+                      }
                       var frm = mkfrm(textNode.parentNode.parentNode, frm_loc);
 		  }
               }
