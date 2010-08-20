@@ -165,17 +165,17 @@
                   var frm_loc = loc+'?decrypt;mode=postMessage#decrypt=';
                   var local_str = textNode.data;
                   var higher_str = textNode.parentNode.parentNode.textContent;
-                  var m = crypted_regex.exec(local_str);
 		  var n = crypted_regex.exec(higher_str);
+                  var m = crypted_regex.exec(local_str);
                   if (m!=null) {
                       nodes.push(textNode);
                       do {
                           frm_loc += m[0];
                       } while ((m = crypted_regex.exec(local_str)) != null);
                       var frm = mkfrm(textNode.parentNode, frm_loc);
-                  } else if (n!=null) {	
+                  } else if (n!=null) {
                       /*for facebook, which breaks up long words
-                        mysteriously,that also means we track the second regex.exec()
+                        it's while-do here because var m reset regex for var n
                        */
                       nodes.push(textNode);
                       while ((n = crypted_regex.exec(higher_str)) != null) {
