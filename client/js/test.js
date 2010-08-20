@@ -39,16 +39,17 @@ var Tester = new (function runTests() {
 	if (!true_v) throw Error("Failed on: "+msg)
     }
     var vv = this.vars = {
-	key1_alias:'key1_alias',
+	key1_alias:'key1_test_alias',
 	key1_secret:null,
-	key2_alias:'key2_alias',
+	key2_alias:'key2_test_alias',
 	key2_secret:null,
 	msg1_plaintext:'Foo and Bar and Hello',
 	msg1_encrypted:null,
 	msg1_encrypted_uni:null,
 	backup_passphrase:'Never lie to your mother',
 	backup_string:null,
-	share_string:null
+	share_string:null,
+	msg2_encrypted:null
     }
     this.tests = [
 	/// #1   -*create key1
@@ -154,7 +155,6 @@ var Tester = new (function runTests() {
 		document.location = '#test'
 		assert(Stor.keyList().length>1,'Key list should not be empty')
 		var user_secret = vv.key1_secret.substr(2)
-		console.log(vv.key1_secret)
 		var user = Stor.getInfo(user_secret)
 		assert(user.alias,'has alias')
 		assert(user.alias.v==vv.key1_alias,'alias was correctly restored')
@@ -178,8 +178,17 @@ var Tester = new (function runTests() {
 	/// #12  ?restore from share
 	function restore_from_share() {
 	    self.test_restore('backup_passphrase','share_string')
-	}
-/// #13  ?decrypt message
-/// #14  -encrypt message2 (with key1)
+	},
+        /// #13  ?decrypt message
+        function decrypt_message_fromshare() {
+	    self.dec_test_func()
+        },
+        /// #14  -encrypt message2 (with key1)
+        function encrypt_with_key2() {
+            ///just tells us that after the loading of the shared file, encryption still works
+	    vv.msg2_encrypted = encrypt_message(vv.msg1_plaintext,'base64',vv.key2_secret)       
+            assert(vv.msg1_plaintext+'<br />' == decrypt_message(vv.msg2_encrypted),
+                   'encryption/decyption on key2 after loading shared backup')
+        }
     ]
 })()

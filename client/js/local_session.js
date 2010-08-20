@@ -186,8 +186,9 @@
 	      var iv_ciph = CBook['base64'
 				 ].decrypt.apply(null,frm.elements['backup'].value.split(','));
 	      var restoral_keys = JSON.parse(decrypt(iv_ciph[0],iv_ciph[1], passkey));
-	      for (a in restoral_keys[0]) 
+	      for (a in restoral_keys[0]) {
 		  self.addFriend(a, restoral_keys[0][a]);
+              }
 	      for (m in restoral_keys[1]) {
 		  self.addMyKey(m)
 	      }
@@ -206,7 +207,7 @@
 	    var o = eee['friendkey'].options;
 	    for (var i=0;i<o.length;i++) {
 		if (o[i].selected) {
-		    key_list.push(o[i].value);
+		    key_list.push(o[i].value.substr(2));
 		}
 	    }
 	    eee['backup'].value = self.getBackup(key_list,passkey);
