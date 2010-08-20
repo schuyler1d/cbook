@@ -212,6 +212,7 @@
 	this.deleteEverything = function() {
 	    if (confirm("Are you sure you want to delete all your keys from this browser?")) {
 		self.permStor.deleteEveryFuckingThing();
+		self.friendsCache = {};
 		alert("Your keys have been removed. Don't lose your backup!");
 	    }
 	}
