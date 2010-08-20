@@ -65,7 +65,10 @@
         this.getKeysByIdentifier = function(ident) {
             return self.friendsCache[ident];
         }
-
+	this.isMyKey = function(secret) {
+	    var me = JSON.parse(self.permStor.get(self.nsME,'{}'));
+	    return (secret in me)
+	}
 	this.keyList = function(limit) {
 	    var key_list = [/*me-friends divider:*/['','','---------']];
 	    var me = JSON.parse(self.permStor.get(self.nsME,'{}'));
@@ -185,9 +188,9 @@
 	      var restoral_keys = JSON.parse(decrypt(iv_ciph[0],iv_ciph[1], passkey));
 	      for (a in restoral_keys[0]) 
 		  self.addFriend(a, restoral_keys[0][a]);
-	      for (m in restoral_keys[1]) 
-		  self.addMyKey(restoral_keys[1][m]);
-
+	      for (m in restoral_keys[1]) {
+		  self.addMyKey(m)
+	      }
 	      alert('Restoral complete');
 	      self.refreshForms();
 	  } catch(e) {

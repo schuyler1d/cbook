@@ -79,7 +79,7 @@
 		   value="Delete All Keys from Browser" />
 	</p>
       </form>
-      <form id="restore" class="sec" onsubmit="Stor.restoreForm(this);return false;">
+      <form id="restore" name="restore" class="sec" onsubmit="Stor.restoreForm(this);return false;">
 	<p>Pass Phrase for restoral:
 	  <input type="text" name="passphrase" />
 	</p>
@@ -109,6 +109,7 @@
       </form>
     </div>
     <ul id="test" class="sec">
+      <li>WARNING: don't run this on the host/browser you use.  It may DELETE ALL YOUR KEYS.</li>
       <li><form name="test" onsubmit="Tester.run();return false;"><button>Run Tests</button></form></li>
     </ul>
 

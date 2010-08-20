@@ -21,7 +21,7 @@ var Tester = new (function runTests() {
 	testdom = document.getElementById('test')
     this.run = function() {
 	for (var i=0;i<self.tests.length;i++) {
-	    var name = i+' '+self.tests[i].name;
+	    var name = i+' '+self.tests[i].name
 	    try {
 		self.msg(name,self.tests[i](),false)
 	    } catch(e) {
@@ -83,17 +83,20 @@ var Tester = new (function runTests() {
 	    vv.msg1_encrypted_uni = encrypt_message(vv.msg1_plaintext,'unicrap',vv.key1_secret)
 	    //self.msg('--plaintext:',vv.msg1_plaintext)
 	    //self.msg('--crypt:',vv.msg1_encrypted)
-	    var crypted_regex = new RegExp(crypted_regex_str,'g');
+	    var crypted_regex = new RegExp(crypted_regex_str,'g')
 	    assert(crypted_regex.test(vv.msg1_encrypted),
 	    	   'encrypted message is proper form:'+vv.msg1_encrypted)
 	},
 	/// #3   ?decrypt message
 	function decrypt_msg() {
-	    var plain = decrypt_message(vv.msg1_encrypted)
-	    assert(plain.length,'decrypted message is non-empty')
-	    assert(plain == vv.msg1_plaintext+ '<br />','Decrypted base64 message ==original:')
-	    assert(decrypt_message(vv.msg1_encrypted_uni)==vv.msg1_plaintext+'<br />',
-		   'Decrypted unicrap message ==original:')
+	    self.dec_test_func = function() {
+		var plain = decrypt_message(vv.msg1_encrypted)
+		assert(plain.length,'decrypted message is non-empty')
+		assert(plain == vv.msg1_plaintext+ '<br />','Decrypted base64 message ==original:')
+		assert(decrypt_message(vv.msg1_encrypted_uni)==vv.msg1_plaintext+'<br />',
+		       'Decrypted unicrap message ==original:')
+	    }
+	    self.dec_test_func()
 	},
 	/// #4   -*full backup 
 	function full_backup() {
@@ -126,20 +129,38 @@ var Tester = new (function runTests() {
 	},
 	/// #6   -delete everything
 	function deleteEverything() {
-	    Stor.deleteEverything()
-	    assert(Stor.keyList().length==0,'Key list deleted')
-	    var fcount=0;
-	    for (a in Stor.friendsCache) fcount++
-	    assert(fcount==0,'nothing cached')
+	    self.test_deleteEverything = function () {
+		Stor.deleteEverything()
+		assert(Stor.keyList().length==1,'Key list empty except --- divider')
+		var fcount=0
+		for (a in Stor.friendsCache) fcount++
+		assert(fcount==0,'nothing cached')
+	    }
+	    self.test_deleteEverything()
 	},
 	/// #7   ?restore from full
+	/// #8      test alias, user
 	function restoreFromFull() {
-	    
+	    var frm= document.forms['restore']
+	    frm.elements['passphrase'].value = vv.backup_passphrase
+	    frm.elements['backup'].value = vv.backup_string
+	    Stor.restoreForm(frm)
+	    document.location = '#test'
+	    assert(Stor.keyList().length>1,'Key list not empty')
+	    var user_secret = vv.key1_secret.substr(2)
+	    var user = Stor.getInfo(user_secret)
+	    assert(user.alias,'has alias')
+	    assert(user.alias.v==vv.key1_alias,'alias was correctly restored')
+	    assert(Stor.isMyKey(user_secret),'labeled as my key')
+	},
+	/// #9   ?decrypt message
+	function decrypt_after_restoral() {
+	    self.dec_test_func()
+	},
+	/// #10  -delete everything again
+	function delete_everything_again() {
+	    self.test_deleteEverything()
 	}
-/// #8      test alias, user
-/// #9   ?decrypt message
-
-/// #10  -delete everything
 /// #11  -*create key2
 /// #12  ?restore from share
 /// #13  ?decrypt message
