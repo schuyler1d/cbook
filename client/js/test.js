@@ -41,41 +41,46 @@ var Tester = new (function runTests() {
     var vv = this.vars = {
 	key1_alias:'key1_alias',
 	key1_secret:null,
+	key2_alias:'key2_alias',
+	key2_secret:null,
 	msg1_plaintext:'Foo and Bar and Hello',
 	msg1_encrypted:null,
 	msg1_encrypted_uni:null,
 	backup_passphrase:'Never lie to your mother',
 	backup_string:null,
-	shared_string:null
+	share_string:null
     }
     this.tests = [
 	/// #1   -*create key1
 	function create_key1() {
-	    //setup
-	    var frm= document.forms['generatekey']
-	    frm.elements['alias'].value = vv.key1_alias
-	    Stor.generateKey(frm) //submit
-
-	    //tests
-	    var keys = Stor.keyList()
-	    assert(keys.length > 1,'some key exists')
-	    var found_key = false,
-	        o = document.forms['encrypt'].elements['friendkey'].options
-	    for (var i=0;i<keys.length;i++) { 
-		if (keys[i][2] == vv.key1_alias) {
-		    found_key = true
-		    break
+	    self.test_createKey = function(vv_prefix) {
+		//setup
+		var frm= document.forms['generatekey']
+		frm.elements['alias'].value = vv[vv_prefix+'_alias']
+		Stor.generateKey(frm) //submit
+		
+		//tests
+		var keys = Stor.keyList()
+		assert(keys.length > 1,'some key exists')
+		var found_key = false,
+	            o = document.forms['encrypt'].elements['friendkey'].options
+		for (var i=0;i<keys.length;i++) { 
+		    if (keys[i][2] == vv[vv_prefix+'_alias']) {
+			found_key = true
+			break
+		    }
 		}
+		assert(found_key, 'key alias is in DB')
+		found_key = false
+		for (var i=0;i<o.length;i++) 
+		    if (o[i].innerHTML == vv[vv_prefix+'_alias']) {
+			found_key = true
+			vv[vv_prefix+'_secret'] = o[i].value
+			break
+		    }
+		assert(found_key, 'key alias is in encrypt form')
 	    }
-	    assert(found_key, 'key alias is in DB')
-	    found_key = false
-	    for (var i=0;i<o.length;i++) 
-		if (o[i].innerHTML == vv.key1_alias) {
-		    found_key = true
-		    vv.key1_secret = o[i].value
-		    break
-		}
-	    assert(found_key, 'key alias is in encrypt form')
+	    self.test_createKey('key1')
 	},
 	/// #2   -*encrypt message
 	function encrypt_msg() {
@@ -141,16 +146,21 @@ var Tester = new (function runTests() {
 	/// #7   ?restore from full
 	/// #8      test alias, user
 	function restoreFromFull() {
-	    var frm= document.forms['restore']
-	    frm.elements['passphrase'].value = vv.backup_passphrase
-	    frm.elements['backup'].value = vv.backup_string
-	    Stor.restoreForm(frm)
-	    document.location = '#test'
-	    assert(Stor.keyList().length>1,'Key list not empty')
-	    var user_secret = vv.key1_secret.substr(2)
-	    var user = Stor.getInfo(user_secret)
-	    assert(user.alias,'has alias')
-	    assert(user.alias.v==vv.key1_alias,'alias was correctly restored')
+	    self.test_restore = function(bk_pass,bk_str) {
+		var frm= document.forms['restore']
+		frm.elements['passphrase'].value = vv[bk_pass]
+		frm.elements['backup'].value = vv[bk_str]
+		Stor.restoreForm(frm)
+		document.location = '#test'
+		assert(Stor.keyList().length>1,'Key list should not be empty')
+		var user_secret = vv.key1_secret.substr(2)
+		console.log(vv.key1_secret)
+		var user = Stor.getInfo(user_secret)
+		assert(user.alias,'has alias')
+		assert(user.alias.v==vv.key1_alias,'alias was correctly restored')
+		return user_secret
+	    }
+	    var user_secret = self.test_restore('backup_passphrase','backup_string')
 	    assert(Stor.isMyKey(user_secret),'labeled as my key')
 	},
 	/// #9   ?decrypt message
@@ -160,9 +170,15 @@ var Tester = new (function runTests() {
 	/// #10  -delete everything again
 	function delete_everything_again() {
 	    self.test_deleteEverything()
+	},
+	/// #11  -*create key2
+	function create_key2() {
+	    self.test_createKey('key2')
+	},
+	/// #12  ?restore from share
+	function restore_from_share() {
+	    self.test_restore('backup_passphrase','share_string')
 	}
-/// #11  -*create key2
-/// #12  ?restore from share
 /// #13  ?decrypt message
 /// #14  -encrypt message2 (with key1)
     ]
