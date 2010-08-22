@@ -208,6 +208,11 @@ function encrypt_message(plaintext, mode, key_and_ref) {
         key = Base64.decodeBytes(key_and_ref.substr(2)),
         tries = 200,
         comp = [];
+    if (!key_ref || !key.length) {
+	alert("Please choose a key to encrypt with. "
+	      +"If you haven't yet, generate a key for yourself.");
+	throw Error('no key');
+    }
     while (--tries) {
 	try {
             comp = CBook[mode].encrypt.apply(null,encrypt(plaintext, key));
